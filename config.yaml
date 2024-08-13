@@ -1,0 +1,13 @@
+path: C:\Users\marco\Desktop\BoatTracking
+train: MarinaPictures\train
+val: MarinaPictures\valid
+
+# Number of classes
+nc: 4
+
+# Classes
+names:
+  0: aircraft
+  1: boat
+  2: mark
+  3: idk
