@@ -3,11 +3,12 @@ train: MarinaPictures\train
 val: MarinaPictures\valid
 
 # Number of classes
-nc: 4
+nc: 5
 
 # Classes
 names:
   0: aircraft
   1: boat
-  2: mark
-  3: idk
+  2: skiff
+  3: personal watercraft
+  4: mark
