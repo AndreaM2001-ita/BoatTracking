@@ -33,13 +33,19 @@ def analyze_video(video_path, output_path, model_path):
                 x1, y1, x2, y2 = map(int, box.xyxy[0].numpy())
                 confidence = box.conf[0].item()
                 
+                # Get the class ID and class name
+                class_id = int(box.cls[0])
+                class_name = result.names[class_id]  # Get the class name from the result object
+                
+                # Create the label with both class name and confidence
+                label = f"{class_name} {confidence:.2f}"
+                
                 # Draw the bounding box
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
                 
-                # Put the confidence score
-                label = f"{confidence:.2f}"
+                # Put the label above the bounding box
                 cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-        
+            
         # Write the frame to the output video
         out.write(frame)
     
@@ -61,4 +67,4 @@ if __name__ == "__main__":
         if video_file.endswith('.m4v'):
             video_path = os.path.join(videos_dir, video_file)
             output_path = os.path.join(output_dir, f"output_{video_file}")
-            analyze_video(video_path, output_path, "trained_model.pt")
+            analyze_video(video_path, output_path, "trainedPrototypewithCars.pt")

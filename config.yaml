@@ -1,14 +1,6 @@
 path: C:\Users\marco\Desktop\BoatTracking
-train: MarinaPictures\train
-val: MarinaPictures\valid
+train: boats1\train
+val: boats1\val
 
-# Number of classes
 nc: 5
-
-# Classes
-names:
-  0: aircraft
-  1: boat
-  2: skiff
-  3: personal watercraft
-  4: mark
+names: ['Fishing Boat', 'Runabout', 'Sailboat', 'Yacht', 'Skiff']
