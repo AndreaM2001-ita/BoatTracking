@@ -67,4 +67,4 @@ if __name__ == "__main__":
         if video_file.endswith('.m4v'):
             video_path = os.path.join(videos_dir, video_file)
             output_path = os.path.join(output_dir, f"output_{video_file}")
-            analyze_video(video_path, output_path, "trainedPrototypewithCars.pt")
+            analyze_video(video_path, output_path, "trainedPrototypewithCars2.pt")
