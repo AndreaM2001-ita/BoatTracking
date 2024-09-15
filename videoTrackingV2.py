@@ -80,6 +80,11 @@ def track_video(video_path, output_path, time_since_epoch, hour, currentModel):
             break
 
         if success:
+            #####
+            # A good portion of this next section is taken from 
+            # https://github.com/AarohiSingla/Tracking-and-counting-Using-YOLOv8-and-DeepSORT
+            # with some alterations and additions
+            #####
             og_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             frame = og_frame.copy()
 
@@ -150,12 +155,11 @@ def track_video(video_path, output_path, time_since_epoch, hour, currentModel):
                 # The idea here is the results written out below will have coordinate information added to the file name
                 # This way, later on, they can be tested to see if the boat track moved at all during the video
                 # Boats that do not moved are assumed to be moored and removed from consideration
-                #coX = str(int(x1)+int(x2)/2)
-                #coY = str(int(y1)+int(y2)/2)
-                #coords = coX+coY
-
-                image_path = f"result_tracks/Boat_{track_id}_{frameEpoch}.jpg"
-                #image_path = f"result_tracks/Boat_{track_id}_{frameEpoch}_{coords}.jpg"
+                coX = int((x1+x2)/2)
+                coY = int((y1+y2)/2)
+                
+                #image_path = f"result_tracks/Boat_{track_id}_{frameEpoch}.jpg"
+                image_path = f"result_tracks/Boat_{track_id}_{frameEpoch}_{coX}_{coY}.jpg"
                 print(f"writing frame {i}")
                 cv2.imwrite(image_path, cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)[int(y1-20):int(y1+h+20), int(x1-20):int(x1+w+20)])
 
