@@ -77,6 +77,10 @@ def track_video(video_path, output_path, time_since_epoch, hour, currentModel):
             # Write a file that will tell the tracker what the next ID should be when it runs again to avoid duplicate IDs being written to results folder
             with open("nextID.txt", "w") as file:
                 file.write(f"{last_id+1}")
+            if not os.path.exists("results.txt"):
+                with open("results.txt", "w") as file:
+                    file.write("")
+
             break
 
         if success:
@@ -223,4 +227,4 @@ if __name__ == "__main__":
             video_path = os.path.join(videos_dir, video_file)
             output_path = os.path.join(output_dir, f"output_{video_file}")
 
-            track_video(video_path, output_path, time_since_epoch, hour, "trainedPrototypewithCars2.pt")
+            track_video(video_path, output_path, time_since_epoch, hour, "trainedPrototype3.pt")
