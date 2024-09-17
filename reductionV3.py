@@ -26,18 +26,18 @@ keep_array = []
 
 while len(fnmatch.filter(detections, f'*_{d}_*')):
     coord_array = []
-    det_len = len(fnmatch.filter(detections, f'*_{d}_*')) # number of images of that particular boat ID
+    #det_len = len(fnmatch.filter(detections, f'*_{d}_*')) # number of images of that particular boat ID
     img_array = fnmatch.filter(detections, f'*_{d}_*') # create an array of those images
     img_count = int(len(img_array))
 
-    del img_array[img_count-5:]
-
-    img_count = int(len(img_array))
-
-    if img_count < 5:
+    if img_count < 10:
         for img in img_array:
             os.remove(os.path.join(results_dir, img))
+
     else:
+        del img_array[img_count-5:]
+        img_count = int(len(img_array))
+
         red_remove = img_count % 5
         del img_array[0:red_remove]
         red_scale = int(img_count / 5)
