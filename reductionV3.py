@@ -24,14 +24,18 @@ d = lowest_ID
 count = 0
 keep_array = []
 
-while len(fnmatch.filter(detections, f'*_{d}_*')):
+while len(fnmatch.filter(detections, f'Boat_{d}_*')):
     coord_array = []
     #det_len = len(fnmatch.filter(detections, f'*_{d}_*')) # number of images of that particular boat ID
-    img_array = fnmatch.filter(detections, f'*_{d}_*') # create an array of those images
+    print(d)
+    img_array = fnmatch.filter(detections, f'Boat_{d}_*') # create an array of those images
+    print(img_array)
     img_count = int(len(img_array))
+    print(img_count)
 
     if img_count < 10:
         for img in img_array:
+            print(img)
             os.remove(os.path.join(results_dir, img))
 
     else:
