@@ -15,6 +15,9 @@ from deep_sort.utils.parser import get_config
 from deep_sort.deep_sort import DeepSort
 from deep_sort.sort.tracker import Tracker
 
+from reductionV3 import reduce
+from compareV3 import compare 
+
 #from skimage.metrics import structural_similarity
 
 deep_sort_weights = 'deep_sort/deep/checkpoint/ckpt.t7'
@@ -36,7 +39,7 @@ def track_video(video_path, output_path, time_since_epoch, hour, currentModel):
         output_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (frame_width, frame_height)
     )
 
-    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    #device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
     frames = []
 
@@ -92,7 +95,7 @@ def track_video(video_path, output_path, time_since_epoch, hour, currentModel):
             og_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             frame = og_frame.copy()
 
-            results = model(frame, device=0, classes=(0, 1, 2, 3, 4, 5), show_conf=True, conf=0.5)
+            results = model(frame, classes=(0, 1, 2, 3, 4, 5), show_conf=True, conf=0.5)
             #boxes = results[0].boxes.xywh.cpu()
 
             
@@ -227,4 +230,6 @@ if __name__ == "__main__":
             video_path = os.path.join(videos_dir, video_file)
             output_path = os.path.join(output_dir, f"output_{video_file}")
 
-            track_video(video_path, output_path, time_since_epoch, hour, "trainedPrototype3.pt")
+            track_video(video_path, output_path, time_since_epoch, hour, "trainedPrototypewithCars2.pt")
+    reduce()
+    compare()
