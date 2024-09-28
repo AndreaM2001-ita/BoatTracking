@@ -37,115 +37,104 @@ def structural_sim(img1, img2):
   return sim
 
 def compare():
-  script_dir = os.path.dirname(os.path.abspath(__file__))
-  results_dir = os.path.join(script_dir, 'result_tracks')
+  script_dir = os.path.dirname(os.path.abspath(__file__)) # set script directory, the same as this script
+  results_dir = os.path.join(script_dir, 'result_tracks') # set results directory, relative to the script directory
 
-  if not os.path.exists(os.path.join(results_dir, 'matches')):
-    os.makedirs(os.path.join(results_dir, 'matches'))
+  if not os.path.exists(os.path.join(results_dir, 'matches')): #if the folder "matches" doesn't exist...
+    os.makedirs(os.path.join(results_dir, 'matches')) #create it
 
-  if not os.path.exists(os.path.join(results_dir, 'duplicates')):
-    os.makedirs(os.path.join(results_dir, 'duplicates'))
+  if not os.path.exists(os.path.join(results_dir, 'duplicates')): # if the duplicates directory doesn't exist...
+    os.makedirs(os.path.join(results_dir, 'duplicates')) #create it
 
-  match_dir = os.path.join(results_dir, 'matches')
-  dupe_dir = os.path.join(results_dir, 'duplicates')
+  match_dir = os.path.join(results_dir, 'matches') #set match dir, relative to the results dir
+  dupe_dir = os.path.join(results_dir, 'duplicates') #set duplicate dir, relative to the results dir
 
-  comp_dict = {}
-  comp_results = {}
+  comp_dict = {} # create comparison dictionary
+  comp_results = {} #create comparison results dictionary
+  boatIDs = [] # create a boatID list
 
-  res_num = len(fnmatch.filter(os.listdir(results_dir), '*.jpg'))
+  res_num = len(fnmatch.filter(os.listdir(results_dir), '*.jpg')) #find the number of files in the results directory that are JPGs
 
-  for i in range(0, res_num, 5):
-    image = fnmatch.filter(os.listdir(results_dir), '*.jpg')[i]
-    imageID = image.split("_")[0]
-    batch = fnmatch.filter(os.listdir(results_dir), f'{imageID}_*')
-    comp_dict[len(comp_dict)+1] = imageID, (batch[4].split("_"))[1], 0, 'O', 0
+  for i in range(0, res_num, 5): # iterate through all the images in the results directory in leaps of 5 (as there will be 5 images per ID at this stage)
+    image = fnmatch.filter(os.listdir(results_dir), '*.jpg')[i] #take the image name
+    imageID = image.split("_")[0] #split it by underscores and take the first value (the ID number)
+    boatIDs.append(int(imageID)) # and append it to this list
 
-  boatIDs = []
-  for i in range(1, len(comp_dict)+1):
-    boatIDs.append(int(comp_dict.get(i)[0]))
-  boatIDs.sort()
+  boatIDs.sort() # sort the list so they're sequential
+  #print(boatIDs)
 
   r_index = 0
   l_index = 0
   
-  #for i in range(0, len(boatIDs)):
   i = 0
-  while i < len(boatIDs):
-    print("while i less than boatIDs")
-    print(i, len(boatIDs))
+  while i < len(boatIDs): # while i is less than the number of boatIDs to compare
+    #print("while i less than boatIDs")
+    #print(i, len(boatIDs))
 
-    if i+1 < len(boatIDs):
-      print("if i+1")
-      compare1 = fnmatch.filter(os.listdir(results_dir), f'{boatIDs[i]}_*')
-      l_index = int(((compare1[4].split("_"))[1]))
-      j = i+1
-      print(j)
+    if i+1 < len(boatIDs): # if there is atleast 2 boat IDs to compare
+      #print("if i+1")
+      compare1 = fnmatch.filter(os.listdir(results_dir), f'{boatIDs[i]}_*') # create a list of all the boat image names of one of the IDs
+      l_index = int(((compare1[4].split("_"))[1])) #take the detection time of the last image as the 'launch' time
+      j = i+1 #make j +1 so we're always at least comparing "the next" boat ID
+      #print(j)
 
-      while j < len(boatIDs):
-        print("while j")
-        compare2 = fnmatch.filter(os.listdir(results_dir), f'{boatIDs[j]}_*')
-        r_index = int(((compare2[0].split("_"))[1]))
+      while j < len(boatIDs): #while j is less than the number boat IDs, there are more boat IDs to compare
+        #print("while j")
+        compare2 = fnmatch.filter(os.listdir(results_dir), f'{boatIDs[j]}_*') #create a list of boat images of the comparison ID
+        r_index = int(((compare2[0].split("_"))[1])) # take the detection time of the first image as the 'possible return' time
 
-        orb_similarity = 0
+        orb_similarity = 0 #set Orb and SSim to 0
         ssim = 0
 
-        for img1 in compare1:
+        for img1 in compare1: #for every image in the first list
 
-          for img2 in compare2:
+          for img2 in compare2: #compare it against all images of the second list
             com1 = cv2.imread(os.path.join(results_dir, img1), 0)
             com2 = cv2.imread(os.path.join(results_dir, img2), 0)
-            orb_similarity = orb_similarity + orb_sim(com1, com2)  #1.0 means identical. Lower = not similar
+            orb_similarity = orb_similarity + orb_sim(com1, com2)  # the higher the results, the more alike it is
 
             #Resize for SSIM
             from skimage.transform import resize
             com2r = resize(com2, (com1.shape[0], com1.shape[1]), anti_aliasing=True, preserve_range=True)
-            ssim = ssim + structural_sim(com1, com2r) #1.0 means identical. Lower = not similar
+            ssim = ssim + structural_sim(com1, com2r) # the higher the results, the more alike it is
 
-        orb = round((orb_similarity * 20 ), 2)
+        orb = round((orb_similarity * 20 ), 2) # divided by 25, then multiplied by 100 (for percentage), then multiplied by 5 to exagerate the differences between similar and dissimilar detections
         struc_sim = round((ssim * 20), 2)
 
-        print(f'The average Orb and Structural Similarity scores between boat ID {boatIDs[i]} and {boatIDs[j]} are:')
-        print(f' Orb: {orb}')
-        print(f' Ssim: {struc_sim}\n')
+        #print(f'The average Orb and Structural Similarity scores between boat ID {boatIDs[i]} and {boatIDs[j]} are:')
+        #print(f' Orb: {orb}')
+        #print(f' Ssim: {struc_sim}\n')
 
-        if (orb > 30) & (struc_sim > 10):
-          #grab compare1[4] and take the index from it and convert it from epoch time back to a time stamp
+        if (orb > 30) & (struc_sim > 10): #if the two image batches are similar
 
-          if abs((r_index - l_index)) > 1800:
-            waterminutes = int(((r_index - l_index) / 60) )
-            comp_results[i+1] = boatIDs[i], l_index, r_index, 'M', boatIDs[j], waterminutes
-            print(f"matched {boatIDs[i]} and {boatIDs[j]}")
+          if abs((r_index - l_index)) > 1800: #and they're far enough apart to not be a duplicate
+            waterminutes = int(((r_index - l_index) / 60) ) # since epoch seconds are from the same time stamp, and they're just seconds, we can divide their difference by 60 to get minutes on water
+            comp_results[i+1] = boatIDs[i], l_index, r_index, 'M', boatIDs[j], waterminutes #add this boat as a Match to the comp_results dictionary
+            #print(f"matched {boatIDs[i]} and {boatIDs[j]}")
             break
 
           else:
-            comp_results[i+1] = boatIDs[j], l_index, r_index, 'D', boatIDs[i]
-            print(f"{boatIDs[j]} is a dupe of {boatIDs[i]}")
-            boatIDs.remove(boatIDs[j])
+            comp_results[i+1] = boatIDs[j], l_index, r_index, 'D', boatIDs[i] #if the boats ARE a match, but their launch/retrieve window is too close, consider them a Duplicate
+            #print(f"{boatIDs[j]} is a dupe of {boatIDs[i]}")
+            boatIDs.remove(boatIDs[j]) #remove the duplicate ID from the boatIDs list so it doesn't try to compare against other batches
             break
             
-        else:
-          if not comp_results.get(i+1):
-            comp_results[i+1] = boatIDs[i], l_index, 0, 'O', 0
-            print(f"{boatIDs[i]} is an orphan")
+        else: #if the images are not a match
+          comp_results[i+1] = boatIDs[i], l_index, 0, 'O', 0 #add boat ID to the dictionary as an orphan
+            #print(f"{boatIDs[i]} is an orphan")
           
         j+=1
 
-    else:
-      comp_results[i+1] = boatIDs[i], l_index, 0, 'O', 0
-      print(f"{boatIDs[i]} is an orphan")
+    else: #if there are no other boats to compare against (it's the last ID of the list)
+      comp_results[i+1] = boatIDs[i], l_index, 0, 'O', 0 #add as an orphan
+      #print(f"{boatIDs[i]} is an orphan")
 
-      #foundIDs = []
-      #for k in range(0, len(comp_results)):
-      #  foundIDs.append(int(comp_results.get(k+1)[0]))
-      #  foundIDs.append(int(comp_results.get(k+1)[4]))
-      #if int(boatIDs[i]) not in foundIDs:
-      #  comp_results[k+2] = boatIDs[i], l_index, 0, 'O', 0
     i+=1
   i+=1
 
 
   ##### Comparison results output #####
-  print(comp_results)
+  #print(comp_results)
   for r in range(1, len(comp_results)+1): #loop through the comp_results dictionary
     if comp_results.get(r)[3] == 'M': #if the nested dictionary value denoting status is 'M'atch
       moveID1 = comp_results.get(r)[0] # grab the Boat ID
