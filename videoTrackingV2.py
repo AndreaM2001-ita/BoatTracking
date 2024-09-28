@@ -16,7 +16,19 @@ from deep_sort.deep_sort import DeepSort
 from deep_sort.sort.tracker import Tracker
 
 from reductionV3 import reduce
-from compareV3 import compare 
+from compareV4 import compare  
+
+from fastapi import FastAPI, Depends, HTTPException
+from serverV2 import read_boats
+
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Float, Boolean
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
+
+from fastapi import FastAPI, Depends, HTTPException
+from sqlalchemy.orm import Session
+
+from database import engine, get_db, BoatDetails  # Import from database file
 
 #from skimage.metrics import structural_similarity
 
@@ -158,14 +170,9 @@ def track_video(video_path, output_path, time_since_epoch, hour, currentModel):
                 frame_seconds = int(i*7.6) #calculate, from the frames array, how many seconds from the start of the video this was (7.6s per frame curently)
                 frameEpoch = int(time_since_epoch+frame_seconds-28800)
 
-                ##### This hasn't been implimented yet.
-                # The idea here is the results written out below will have coordinate information added to the file name
-                # This way, later on, they can be tested to see if the boat track moved at all during the video
-                # Boats that do not moved are assumed to be moored and removed from consideration
                 coX = int((x1+x2)/2)
                 coY = int((y1+y2)/2)
                 
-                #image_path = f"result_tracks/Boat_{track_id}_{frameEpoch}.jpg"
                 image_path = f"result_tracks/Boat_{track_id}_{frameEpoch}_{coX}_{coY}.jpg"
                 print(f"writing frame {i}")
                 cv2.imwrite(image_path, cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)[int(y1-20):int(y1+h+20), int(x1-20):int(x1+w+20)])
@@ -212,10 +219,14 @@ if __name__ == "__main__":
     videos_dir = os.path.join(script_dir, 'videos')
     output_dir = os.path.join(script_dir, 'output')
 
+    if os.path.exists("output.txt"):
+        os.remove("output.txt")
+
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     Timestmp = []
     # Example: analyze all .m4v videos in the 'videos' folder
+
     for video_file in os.listdir(videos_dir):
         if video_file.endswith('.m4v'):
             # Get date and time from the video file
@@ -230,6 +241,28 @@ if __name__ == "__main__":
             video_path = os.path.join(videos_dir, video_file)
             output_path = os.path.join(output_dir, f"output_{video_file}")
 
-            track_video(video_path, output_path, time_since_epoch, hour, "trainedPrototypewithCars2.pt")
-    reduce()
+            #track_video(video_path, output_path, time_since_epoch, hour, "trainedPrototypewithCars2.pt")
+
+    print("\nVideo analysis complete. Beginning detection reduction")
+    #reduce()
+
+    print("\nReduction complete. Beginning detection matching")
     compare()
+
+    print("\nMatching complete, outputting database information")
+    boats = read_boats()
+
+    with open("output.txt", "w") as file:
+        file.write("")
+
+
+
+    for boat in boats:
+        
+        if boat.matchID:
+            with open("output.txt", "w") as file: #open the results file as "a"ppend and write out the results
+              file.write(f"\nBoat ID: {boat.boatID}, matched with Boat ID {boat.matchID}\nLaunched on {boat.launchTime}, retreived {boat.retrievalTime}\nTime at sea: {boat.timeAtSea}")
+        else:
+            with open("output.txt", "w") as file: #open the results file as "a"ppend and write out the results
+              file.write(f"\nBoat ID: {boat.boatID}\nlaunched on {boat.launchTime}")
+    print("\nWriting complete.")
