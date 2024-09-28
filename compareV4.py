@@ -6,10 +6,12 @@ import datetime
 import calendar
 
 from serverV2 import create_launch_event, update_retrieval_event, read_boats
-from sqlalchemy.orm import Session
 
-from fastapi import FastAPI, Depends, HTTPException
-
+##########
+#The following comparison scripting is taken from
+# https://www.youtube.com/watch?v=16s3Pi1InPU
+# https://github.com/bnsreenu/python_for_microscopists/blob/master/191_measure_img_similarity.py
+##########
 def orb_sim(img1, img2):
   # SIFT is no longer available in cv2 so using ORB
   orb = cv2.ORB_create()
@@ -28,7 +30,6 @@ def orb_sim(img1, img2):
   if len(matches) == 0:
     return 0
   return len(similar_regions) / len(matches)
-
 
 #Needs images to be same dimensions
 def structural_sim(img1, img2):
