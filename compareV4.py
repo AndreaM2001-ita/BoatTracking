@@ -68,14 +68,21 @@ def compare():
   r_index = 0
   l_index = 0
   
-  for i in range(0, len(boatIDs)):
+  #for i in range(0, len(boatIDs)):
+  i = 0
+  while i < len(boatIDs):
+    print("while i less than boatIDs")
+    print(i, len(boatIDs))
 
     if i+1 < len(boatIDs):
+      print("if i+1")
       compare1 = fnmatch.filter(os.listdir(results_dir), f'{boatIDs[i]}_*')
       l_index = int(((compare1[4].split("_"))[1]))
       j = i+1
+      print(j)
 
       while j < len(boatIDs):
+        print("while j")
         compare2 = fnmatch.filter(os.listdir(results_dir), f'{boatIDs[j]}_*')
         r_index = int(((compare2[0].split("_"))[1]))
 
@@ -111,24 +118,30 @@ def compare():
             break
 
           else:
-            comp_results[i+1] = boatIDs[i], l_index, r_index, 'D', boatIDs[j]
-            print(f"{boatIDs[i]} is a dupe of {boatIDs[j]}")
-            
+            comp_results[i+1] = boatIDs[j], l_index, r_index, 'D', boatIDs[i]
+            print(f"{boatIDs[j]} is a dupe of {boatIDs[i]}")
+            boatIDs.remove(boatIDs[j])
             break
             
         else:
-          comp_results[i+1] = boatIDs[i], l_index, 0, 'O', 0
-          print(f"{boatIDs[i]} is an orphan")
+          if not comp_results.get(i+1):
+            comp_results[i+1] = boatIDs[i], l_index, 0, 'O', 0
+            print(f"{boatIDs[i]} is an orphan")
           
         j+=1
 
     else:
-      foundIDs = []
-      for k in range(0, len(comp_results)):
-        foundIDs.append(int(comp_results.get(k+1)[0]))
-        foundIDs.append(int(comp_results.get(k+1)[4]))
-      if int(boatIDs[i]) not in foundIDs:
-        comp_results[k+2] = boatIDs[i], l_index, 0, 'O', 0
+      comp_results[i+1] = boatIDs[i], l_index, 0, 'O', 0
+      print(f"{boatIDs[i]} is an orphan")
+
+      #foundIDs = []
+      #for k in range(0, len(comp_results)):
+      #  foundIDs.append(int(comp_results.get(k+1)[0]))
+      #  foundIDs.append(int(comp_results.get(k+1)[4]))
+      #if int(boatIDs[i]) not in foundIDs:
+      #  comp_results[k+2] = boatIDs[i], l_index, 0, 'O', 0
+    i+=1
+  i+=1
 
 
   ##### Comparison results output #####
