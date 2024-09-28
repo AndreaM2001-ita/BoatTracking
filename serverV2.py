@@ -62,6 +62,7 @@ def update_retrieval_event(boat_id: int, retrievalTime: str, match_id: int):
     boat_event.retrievalTime = retrieval_time_obj
     boat_event.timeAtSea = round(abs((retrieval_time_obj - boat_event.launchTime).total_seconds() / 3600.0), 2)  # Convert seconds to hours
     boat_event.matchID = match_id
+    boat_event.isOrphan = False
     
     # Commit the changes to the database
     db.commit()

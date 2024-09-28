@@ -241,10 +241,10 @@ if __name__ == "__main__":
             video_path = os.path.join(videos_dir, video_file)
             output_path = os.path.join(output_dir, f"output_{video_file}")
 
-            #track_video(video_path, output_path, time_since_epoch, hour, "trainedPrototypewithCars2.pt")
+            track_video(video_path, output_path, time_since_epoch, hour, "trainedPrototypewithCars2.pt")
 
     print("\nVideo analysis complete. Beginning detection reduction")
-    #reduce()
+    reduce()
 
     print("\nReduction complete. Beginning detection matching")
     compare()
@@ -260,9 +260,9 @@ if __name__ == "__main__":
     for boat in boats:
         
         if boat.matchID:
-            with open("output.txt", "w") as file: #open the results file as "a"ppend and write out the results
-              file.write(f"\nBoat ID: {boat.boatID}, matched with Boat ID {boat.matchID}\nLaunched on {boat.launchTime}, retreived {boat.retrievalTime}\nTime at sea: {boat.timeAtSea}")
+            with open("output.txt", "a") as file: #open the results file as "a"ppend and write out the results
+              file.write(f"Boat ID: {boat.boatID}, matched with Boat ID {boat.matchID}\nLaunched on {boat.launchTime}, retreived {boat.retrievalTime}\nTime at sea: {boat.timeAtSea}\n\n")
         else:
-            with open("output.txt", "w") as file: #open the results file as "a"ppend and write out the results
-              file.write(f"\nBoat ID: {boat.boatID}\nlaunched on {boat.launchTime}")
+            with open("output.txt", "a") as file: #open the results file as "a"ppend and write out the results
+              file.write(f"Boat ID: {boat.boatID}\nlaunched on {boat.launchTime}\n\n")
     print("\nWriting complete.")
