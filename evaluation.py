@@ -3,25 +3,24 @@ from ultralytics import YOLO
 import numpy as np
 import yaml
 
-# Function to evaluate a model on a dataset and return metrics
+
 def evaluate_model(model_path, dataset_path):
-    # Load YOLOv8 model
+    # Load current model
     model = YOLO(model_path)
     
-    # Run validation on the dataset
+    # Run validation 
     results = model.val(data=dataset_path)
     print("--------------------------------")
-    # Extract evaluation metrics
 
 
-# Function to evaluate all models in a folder
+
 def evaluate_models_in_folder(folder_path, dataset_path):
     all_metrics = {}
 
-    # Find all model files in the folder with .pt extension
+    # Find all model files in the folder 
     model_files = [f for f in os.listdir(folder_path) if f.endswith('.pt')]
     
-    # Evaluate each model
+    # Evaluate models
     for model_file in model_files:
         model_path = os.path.join(folder_path, model_file)
         print(f"Evaluating model: {model_path}")
@@ -30,16 +29,14 @@ def evaluate_models_in_folder(folder_path, dataset_path):
     
     return all_metrics
 
-# Path to folder containing YOLOv8 models
-models_folder = 'trainedModels'  # Replace with your folder path
 
-# Path to your dataset (dataset.yaml or a directory with images and labels)
-dataset_pathFile = 'config.yaml'  # Replace with your dataset path
+models_folder = 'trainedModels'  # YOLOv8 Model folder
 
-# Load and evaluate the models, handling potential YAML file errors
+
+dataset_pathFile = 'config.yaml'  # dataset path
+
 try:
     
-    # Evaluate all models in the folder and print metrics
     evaluation_results = evaluate_models_in_folder(models_folder, dataset_pathFile)
 
     # Display the evaluation results

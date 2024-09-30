@@ -2,5 +2,5 @@ path: C:\Users\marco\Desktop\BoatTracking
 train: boats1\train
 val: boats1\val
 
-nc: 5
-names: ['Fishing Boat', 'Runabout', 'Sailboat', 'Yacht', 'Skiff']
+nc: 6
+names: ['Fishing Boat', 'Runabout', 'Sailboat', 'Yacht', 'Skiff', 'policeBoat']
