@@ -239,4 +239,4 @@ dataset:
   test: [project_path]/data
 ```
 
-> Ensure the `config.yaml` file is correctly set up with absolute paths to your datasets.
+> Ensure the `config.yaml` file is correctly set up with absolute paths to your datasets. This file would be helpful for fine-tuning the model further.
