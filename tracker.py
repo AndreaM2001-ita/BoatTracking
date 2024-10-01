@@ -49,7 +49,8 @@ class Tracker:
                     id_inheritance = 1
                     print(id_inheritance)
                 else:
-                    id_inheritance = int(ID)
+                    nID.seek(0)
+                    id_inheritance = int(nID.read())
                     print(id_inheritance)
         ##### Block ends
         self.metric = metric
