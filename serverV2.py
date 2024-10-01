@@ -15,7 +15,7 @@ BoatDetails.metadata.create_all(bind=engine)
 
 # API endpoint to create a boat launch event
 @app.post("/boat/launch/")
-def create_launch_event(boatID: int, launchTime: str):
+def create_launch_event(boatID: int, boatModel: str, launchTime: str):
 
     db = SessionLocal()
 
@@ -29,7 +29,7 @@ def create_launch_event(boatID: int, launchTime: str):
             # Create a new boat event instance
             boat_event = BoatDetails(
                 boatID=boatID,
-                #boatModel=boatModel,
+                boatModel=boatModel,
                 launchTime=launch_time_obj
             )
             

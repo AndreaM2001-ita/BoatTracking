@@ -19,7 +19,7 @@ class BoatDetails(base):
     __tablename__ = "boatDetails"
 
     boatID = Column(Integer, primary_key=True, index=True)  
-    #boatModel = Column(String)  
+    boatModel = Column(String)  
     launchTime = Column(DateTime)  
     retrievalTime = Column(DateTime, nullable=True) 
     timeAtSea = Column(Float, nullable= True) 

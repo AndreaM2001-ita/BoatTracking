@@ -18,19 +18,9 @@ from deep_sort.sort.tracker import Tracker
 from reductionV3 import reduce
 from compareV4 import compare  
 
-from fastapi import FastAPI, Depends, HTTPException
 from serverV2 import read_boats
 
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, Float, Boolean
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
-
-from fastapi import FastAPI, Depends, HTTPException
-from sqlalchemy.orm import Session
-
 from database import engine, get_db, BoatDetails  # Import from database file
-
-#from skimage.metrics import structural_similarity
 
 deep_sort_weights = 'deep_sort/deep/checkpoint/ckpt.t7'
 tracker = DeepSort(model_path=deep_sort_weights, max_age=5) #leaving max_age at 5 cuts down on new IDs being assigned to boats when there's a momentary loss of track
@@ -108,8 +98,6 @@ def track_video(video_path, output_path, time_since_epoch, hour, currentModel):
             frame = og_frame.copy()
 
             results = model(frame, classes=(0, 1, 2, 3, 4, 5), show_conf=True, conf=0.5)
-            #boxes = results[0].boxes.xywh.cpu()
-
             
             for result in results:
                 boxes = result.boxes  # Boxes object for bbox outputs
@@ -123,10 +111,7 @@ def track_video(video_path, output_path, time_since_epoch, hour, currentModel):
                 #print(xywh)
                 for class_index in cls:
                     class_name = class_names[int(class_index)]
-                    #    #print("Class:", class_name)
-                    #image_path = f"result_detects/frame_{i}.jpg"
-                    #print(f"writing frame {i}")
-                    #cv2.imwrite(image_path, cv2.cvtColor(og_frame, cv2.COLOR_RGB2BGR))
+                    #print("Class:", class_name)
 
             pred_cls = np.array(cls)
             conf = conf.detach().cpu().numpy()
@@ -173,10 +158,10 @@ def track_video(video_path, output_path, time_since_epoch, hour, currentModel):
                 coX = int((x1+x2)/2)
                 coY = int((y1+y2)/2)
                 
-                image_path = f"result_tracks/Boat_{track_id}_{frameEpoch}_{coX}_{coY}.jpg"
-                print(f"writing frame {i}")
+                image_path = f"result_tracks/Boat_{track_id}_{frameEpoch}_{coX}_{coY}_{class_name}.jpg"
+                
                 cv2.imwrite(image_path, cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)[int(y1-20):int(y1+h+20), int(x1-20):int(x1+w+20)])
-
+                
         boat_count = len(unique_track_ids)
 
         
@@ -202,12 +187,7 @@ def track_video(video_path, output_path, time_since_epoch, hour, currentModel):
 
         i+=1
             
-            # write the annotated frame
-            #out.write(annotated_frame)
-            #if cv2.waitKey(1) & 0xFF == ord("q"):
-            #    break
-        #else:
-        #    break
+        
     # release the video capture object and close the display window
     cap.release()
     out.release()
@@ -230,7 +210,6 @@ if __name__ == "__main__":
     for video_file in os.listdir(videos_dir):
         if video_file.endswith('.m4v'):
             # Get date and time from the video file
-            #Date_ToD_sep = video_file.split(" ") #split the file name using the space as a delimiter, this should seperate the date from the hour
             Date = video_file.split(" ")[0].split("-") #delimit the date portion of the above using the - . This should give day, month, year; in that order
             hour = video_file.split(" ")[1]
             #Create usable timestamp from above variables
@@ -241,10 +220,10 @@ if __name__ == "__main__":
             video_path = os.path.join(videos_dir, video_file)
             output_path = os.path.join(output_dir, f"output_{video_file}")
 
-            track_video(video_path, output_path, time_since_epoch, hour, "trainedPrototypewithCars2.pt")
+            #track_video(video_path, output_path, time_since_epoch, hour, "trainedPrototypewithCars2.pt")
 
     print("\nVideo analysis complete. Beginning detection reduction")
-    reduce()
+    #reduce()
 
     print("\nReduction complete. Beginning detection matching")
     compare()
@@ -261,8 +240,8 @@ if __name__ == "__main__":
         
         if boat.matchID:
             with open("output.txt", "a") as file: #open the results file as "a"ppend and write out the results
-              file.write(f"Boat ID: {boat.boatID}, matched with Boat ID {boat.matchID}\nLaunched on {boat.launchTime}, retreived {boat.retrievalTime}\nTime at sea: {boat.timeAtSea}\n\n")
+              file.write(f"Boat ID: {boat.boatID}, a {boat.boatModel}, matched with Boat ID {boat.matchID}\nLaunched on {boat.launchTime}, retreived {boat.retrievalTime}\nTime at sea: {boat.timeAtSea}\n\n")
         else:
             with open("output.txt", "a") as file: #open the results file as "a"ppend and write out the results
-              file.write(f"Boat ID: {boat.boatID}\nlaunched on {boat.launchTime}\n\n")
+              file.write(f"Boat ID: {boat.boatID}, a {boat.boatModel}\nlaunched on {boat.launchTime}\n\n")
     print("\nWriting complete.")

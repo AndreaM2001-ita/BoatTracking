@@ -4,6 +4,7 @@ from skimage.metrics import structural_similarity
 import cv2
 import datetime
 import calendar
+from PIL import Image
 
 from serverV2 import create_launch_event, update_retrieval_event, read_boats
 
@@ -43,11 +44,10 @@ def compare():
 
   if not os.path.exists(os.path.join(results_dir, 'matches')): #if the folder "matches" doesn't exist...
     os.makedirs(os.path.join(results_dir, 'matches')) #create it
+  match_dir = os.path.join(results_dir, 'matches') #set match dir, relative to the results dir
 
   if not os.path.exists(os.path.join(results_dir, 'duplicates')): # if the duplicates directory doesn't exist...
     os.makedirs(os.path.join(results_dir, 'duplicates')) #create it
-
-  match_dir = os.path.join(results_dir, 'matches') #set match dir, relative to the results dir
   dupe_dir = os.path.join(results_dir, 'duplicates') #set duplicate dir, relative to the results dir
 
   comp_dict = {} # create comparison dictionary
@@ -66,27 +66,26 @@ def compare():
 
   r_index = 0
   l_index = 0
-  
+  #with open("results.csv", "w") as file:
+  #  file.write(f"\n")
+
   i = 0
   while i < len(boatIDs): # while i is less than the number of boatIDs to compare
-    #print("while i less than boatIDs")
-    #print(i, len(boatIDs))
 
     if i+1 < len(boatIDs): # if there is atleast 2 boat IDs to compare
       #print("if i+1")
       compare1 = fnmatch.filter(os.listdir(results_dir), f'{boatIDs[i]}_*') # create a list of all the boat image names of one of the IDs
       l_index = int(((compare1[4].split("_"))[1])) #take the detection time of the last image as the 'launch' time
+      classNamei = compare1[0].replace('.jpg', '').split("_")[4] #take the detections class name from its first detection
       j = i+1 #make j +1 so we're always at least comparing "the next" boat ID
-      #print(j)
 
       while j < len(boatIDs): #while j is less than the number boat IDs, there are more boat IDs to compare
-        #print("while j")
         compare2 = fnmatch.filter(os.listdir(results_dir), f'{boatIDs[j]}_*') #create a list of boat images of the comparison ID
         r_index = int(((compare2[0].split("_"))[1])) # take the detection time of the first image as the 'possible return' time
-
+        
         orb_similarity = 0 #set Orb and SSim to 0
         ssim = 0
-
+        
         for img1 in compare1: #for every image in the first list
 
           for img2 in compare2: #compare it against all images of the second list
@@ -99,43 +98,47 @@ def compare():
             com2r = resize(com2, (com1.shape[0], com1.shape[1]), anti_aliasing=True, preserve_range=True)
             ssim = ssim + structural_sim(com1, com2r) # the higher the results, the more alike it is
 
+                                    
         orb = round((orb_similarity * 20 ), 2) # divided by 25, then multiplied by 100 (for percentage), then multiplied by 5 to exagerate the differences between similar and dissimilar detections
         struc_sim = round((ssim * 20), 2)
 
-        #print(f'The average Orb and Structural Similarity scores between boat ID {boatIDs[i]} and {boatIDs[j]} are:')
-        #print(f' Orb: {orb}')
-        #print(f' Ssim: {struc_sim}\n')
+        with open("results.txt", "a") as file:
+          file.write(f'The average Orb and Structural Similarity scores between boat ID {boatIDs[i]} and {boatIDs[j]} are:\nOrb: {orb}\nSsim: {struc_sim}\n')
 
-        if (orb > 30) & (struc_sim > 10): #if the two image batches are similar
+        if (orb > 50) & (struc_sim > 17): #if the two image batches are similar
 
           if abs((r_index - l_index)) > 1800: #and they're far enough apart to not be a duplicate
             waterminutes = int(((r_index - l_index) / 60) ) # since epoch seconds are from the same time stamp, and they're just seconds, we can divide their difference by 60 to get minutes on water
-            comp_results[i+1] = boatIDs[i], l_index, r_index, 'M', boatIDs[j], waterminutes #add this boat as a Match to the comp_results dictionary
-            #print(f"matched {boatIDs[i]} and {boatIDs[j]}")
-            break
+            comp_results[i+1] = boatIDs[i], l_index, r_index, 'M', boatIDs[j], waterminutes, classNamei #add this boat as a Match to the comp_results dictionary
+            with open("results.txt", "a") as file:
+              file.write(f"matched {boatIDs[i]} and {boatIDs[j]}\n")
+            #break
 
           else:
             comp_results[i+1] = boatIDs[j], l_index, r_index, 'D', boatIDs[i] #if the boats ARE a match, but their launch/retrieve window is too close, consider them a Duplicate
-            #print(f"{boatIDs[j]} is a dupe of {boatIDs[i]}")
+            with open("results.txt", "a") as file:
+              file.write(f"{boatIDs[j]} is a dupe of {boatIDs[i]}\n")
             boatIDs.remove(boatIDs[j]) #remove the duplicate ID from the boatIDs list so it doesn't try to compare against other batches
-            break
+            #break
             
         else: #if the images are not a match
-          comp_results[i+1] = boatIDs[i], l_index, 0, 'O', 0 #add boat ID to the dictionary as an orphan
-            #print(f"{boatIDs[i]} is an orphan")
+          comp_results[i+1] = boatIDs[i], l_index, 0, 'O', 0, 0, classNamei #add boat ID to the dictionary as an orphan
+          with open("results.txt", "a") as file:
+            file.write(f"{boatIDs[i]} is an orphan\n")
           
         j+=1
 
     else: #if there are no other boats to compare against (it's the last ID of the list)
-      comp_results[i+1] = boatIDs[i], l_index, 0, 'O', 0 #add as an orphan
-      #print(f"{boatIDs[i]} is an orphan")
+      comp_results[i+1] = boatIDs[i], l_index, 0, 'O', 0, 0, classNamei #add as an orphan
+      with open("results.txt", "a") as file:
+              file.write(f"{boatIDs[i]} is an orphan\n")
 
     i+=1
   i+=1
 
 
   ##### Comparison results output #####
-  #print(comp_results)
+  print(comp_results)
   for r in range(1, len(comp_results)+1): #loop through the comp_results dictionary
     if comp_results.get(r)[3] == 'M': #if the nested dictionary value denoting status is 'M'atch
       moveID1 = comp_results.get(r)[0] # grab the Boat ID
@@ -156,7 +159,7 @@ def compare():
         os.replace(os.path.join(results_dir, img2), os.path.join(match_dir, img2)) # ditto
       with open("results.txt", "a") as file: #open the results file as "a"ppend and write out the results
               file.write(f'Boat ID {moveID1} launched on {l_date} at {l_time} and matched with Boat ID {moveID2}, with a  retreival time of {r_time}. Minutes on water: {waterminutes}\n')
-      create_launch_event(comp_results.get(r)[0], comp_results.get(r)[1])
+      create_launch_event(comp_results.get(r)[0], comp_results.get(r)[6], comp_results.get(r)[1])
       update_retrieval_event(comp_results.get(r)[0], comp_results.get(r)[2], comp_results.get(r)[4])
       
     elif comp_results.get(r)[3] == 'D': #if the nested dictionary value denoting status is 'D'uplicate
@@ -169,7 +172,7 @@ def compare():
 
     elif comp_results.get(r)[3] == 'O': #if the nested dictionary value denoting status is 'O'rphan
       orphanID = comp_results.get(r)[0] #grab the Boat ID
-      create_launch_event(comp_results.get(r)[0], comp_results.get(r)[1])
+      create_launch_event(comp_results.get(r)[0], comp_results.get(r)[6], comp_results.get(r)[1])
       with open("results.txt", "a") as file: #write out the results and leave the file in place for the next run. it's just waitin' for a mate...
         file.write(f'Boat ID {orphanID} is an orphan\n')
 
