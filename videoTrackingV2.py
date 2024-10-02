@@ -220,16 +220,17 @@ if __name__ == "__main__":
             video_path = os.path.join(videos_dir, video_file)
             output_path = os.path.join(output_dir, f"output_{video_file}")
 
-            track_video(video_path, output_path, time_since_epoch, hour, "trainedPrototypewithCars2.pt")
+            #track_video(video_path, output_path, time_since_epoch, hour, "trainedPrototypewithCars2.pt")
 
     print("\nVideo analysis complete. Beginning detection reduction")
-    reduce()
+    #reduce()
 
     print("\nReduction complete. Beginning detection matching")
     compare()
 
     print("\nMatching complete, outputting database information")
     boats = read_boats()
+    print(f"{len(boats)} boats acquired.")
 
     with open("output.txt", "w") as file:
         file.write("")
@@ -245,3 +246,4 @@ if __name__ == "__main__":
             with open("output.txt", "a") as file: #open the results file as "a"ppend and write out the results
               file.write(f"Boat ID: {boat.boatID}, a {boat.boatModel}\nlaunched on {boat.launchTime}\n\n")
     print("\nWriting complete.")
+    print(f"\nDetails can be found in {script_dir}\\output.txt")

@@ -37,6 +37,7 @@ def create_launch_event(boatID: int, boatModel: str, launchTime: str):
             db.add(boat_event)
             db.flush()
             db.commit()
+            print("\nBoat launch stored.")
             db.refresh(boat_event)
 
     finally:
@@ -67,6 +68,7 @@ def update_retrieval_event(boat_id: int, retrievalTime: str, match_id: int):
     # Commit the changes to the database
     db.commit()
     db.flush()
+    print("\nBoat retreival updated.")
     
     return boat_event
 
@@ -76,6 +78,7 @@ def read_boats():
     db = SessionLocal()
     try:
         # Fetch all boat events from the database
+        print("\nFetching boats...")
         boats = db.query(BoatDetails).all()
     finally:
         db.close()
