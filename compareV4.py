@@ -119,7 +119,6 @@ def compare():
               file.write(f"matched {boatIDs[i]} and {boatIDs[j]}\n")
             #boatIDs.remove(boatIDs[j]) #remove the duplicate ID from the boatIDs list so it doesn't try to compare against other batches
             matched.append(boatIDs[j])
-            print(boatIDs[j], matched)
 
             break
 
