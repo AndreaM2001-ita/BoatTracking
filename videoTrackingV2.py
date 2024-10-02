@@ -220,10 +220,10 @@ if __name__ == "__main__":
             video_path = os.path.join(videos_dir, video_file)
             output_path = os.path.join(output_dir, f"output_{video_file}")
 
-            #track_video(video_path, output_path, time_since_epoch, hour, "trainedPrototypewithCars2.pt")
+            track_video(video_path, output_path, time_since_epoch, hour, "trainedPrototypewithCars2.pt")
 
     print("\nVideo analysis complete. Beginning detection reduction")
-    #reduce()
+    reduce()
 
     print("\nReduction complete. Beginning detection matching")
     compare()

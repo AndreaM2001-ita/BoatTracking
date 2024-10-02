@@ -47,11 +47,9 @@ class Tracker:
                 ID = nID.read(1)
                 if not ID:
                     id_inheritance = 1
-                    print(id_inheritance)
                 else:
                     nID.seek(0)
                     id_inheritance = int(nID.read())
-                    print(id_inheritance)
         ##### Block ends
         self.metric = metric
         self.max_iou_distance = max_iou_distance

@@ -66,15 +66,18 @@ def compare():
 
   r_index = 0
   l_index = 0
+  matched = []
   #with open("results.csv", "w") as file:
   #  file.write(f"\n")
 
   i = 0
   while i < len(boatIDs): # while i is less than the number of boatIDs to compare
+    #print(f"first while {i}")
 
     compare1 = fnmatch.filter(os.listdir(results_dir), f'{boatIDs[i]}_*') # create a list of all the boat image names of one of the IDs
 
-    if i+1 < len(boatIDs): # if there is atleast 2 boat IDs to compare
+    if i+1 < len(boatIDs): # if there is atleast 2 boat IDs to compare and the ID hasn't been matched yet
+      #print(boatIDs[i], matched)
       #print("if i+1")
       
       l_index = int(((compare1[4].split("_"))[1])) #take the detection time of the last image as the 'launch' time
@@ -114,7 +117,10 @@ def compare():
             comp_results[i+1] = boatIDs[i], l_index, r_index, 'M', boatIDs[j], waterminutes, classNamei #add this boat as a Match to the comp_results dictionary
             with open("results.txt", "a") as file:
               file.write(f"matched {boatIDs[i]} and {boatIDs[j]}\n")
-            boatIDs.remove(boatIDs[j]) #remove the duplicate ID from the boatIDs list so it doesn't try to compare against other batches
+            #boatIDs.remove(boatIDs[j]) #remove the duplicate ID from the boatIDs list so it doesn't try to compare against other batches
+            matched.append(boatIDs[j])
+            print(boatIDs[j], matched)
+
             break
 
           else:
@@ -136,14 +142,14 @@ def compare():
       l_index = int(((compare1[4].split("_"))[1])) #take the detection time of the last image as the 'launch' time
       comp_results[i+1] = boatIDs[i], l_index, 0, 'O', 0, 0, classNamei #add as an orphan
       with open("results.txt", "a") as file:
-              file.write(f"{boatIDs[i]} is an orphan\n")
+        file.write(f"{boatIDs[i]} is an orphan\n")
 
     i+=1
   i+=1
 
 
   ##### Comparison results output #####
-  print(comp_results)
+  #print(comp_results)
   for r in range(1, len(comp_results)+1): #loop through the comp_results dictionary
     if comp_results.get(r)[3] == 'M': #if the nested dictionary value denoting status is 'M'atch
       moveID1 = comp_results.get(r)[0] # grab the Boat ID
@@ -175,7 +181,7 @@ def compare():
       with open("results.txt", "a") as file: #write out the results
         file.write(f'Boat ID {dupeID1} is a duplicate of {dupeID2}\n')
 
-    elif comp_results.get(r)[3] == 'O': #if the nested dictionary value denoting status is 'O'rphan
+    elif (comp_results.get(r)[3] == 'O') & (comp_results.get(r)[0] not in matched): #if the nested dictionary value denoting status is 'O'rphan
       orphanID = comp_results.get(r)[0] #grab the Boat ID
       create_launch_event(comp_results.get(r)[0], comp_results.get(r)[6], comp_results.get(r)[1])
       with open("results.txt", "a") as file: #write out the results and leave the file in place for the next run. it's just waitin' for a mate...

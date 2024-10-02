@@ -60,10 +60,10 @@ def reduce():
                 y.append(int(img_split[4]))
             x_move = abs(x[0]-x[4]) #find x and y displacement by finding the absolute difference between the first and last x and y coordinate values
             y_move = abs(y[0]-y[4])
-            print(f'Boat {d} has moved {x_move} and {y_move} X and Y pixels, respectively')
+            #print(f'Boat {d} has moved {x_move} and {y_move} X and Y pixels, respectively')
             if (x_move < 20) & (y_move < 20): # if the boat has moved LESS than 20 pixels in EITHER x or y
                 for img in img_array: # for every image of that boat
-                    print(f'Boat {d} is considered stationary and has been removed')
+                    #print(f'Boat {d} is considered stationary and has been removed')
                     os.remove(os.path.join(results_dir, img)) #remove it
 
         d+=1 # increment the boat ID number to check
