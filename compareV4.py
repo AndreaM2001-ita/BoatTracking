@@ -72,9 +72,11 @@ def compare():
   i = 0
   while i < len(boatIDs): # while i is less than the number of boatIDs to compare
 
+    compare1 = fnmatch.filter(os.listdir(results_dir), f'{boatIDs[i]}_*') # create a list of all the boat image names of one of the IDs
+
     if i+1 < len(boatIDs): # if there is atleast 2 boat IDs to compare
       #print("if i+1")
-      compare1 = fnmatch.filter(os.listdir(results_dir), f'{boatIDs[i]}_*') # create a list of all the boat image names of one of the IDs
+      
       l_index = int(((compare1[4].split("_"))[1])) #take the detection time of the last image as the 'launch' time
       classNamei = compare1[0].replace('.jpg', '').split("_")[4] #take the detections class name from its first detection
       j = i+1 #make j +1 so we're always at least comparing "the next" boat ID
@@ -112,14 +114,15 @@ def compare():
             comp_results[i+1] = boatIDs[i], l_index, r_index, 'M', boatIDs[j], waterminutes, classNamei #add this boat as a Match to the comp_results dictionary
             with open("results.txt", "a") as file:
               file.write(f"matched {boatIDs[i]} and {boatIDs[j]}\n")
-            #break
+            boatIDs.remove(boatIDs[j]) #remove the duplicate ID from the boatIDs list so it doesn't try to compare against other batches
+            break
 
           else:
             comp_results[i+1] = boatIDs[j], l_index, r_index, 'D', boatIDs[i] #if the boats ARE a match, but their launch/retrieve window is too close, consider them a Duplicate
             with open("results.txt", "a") as file:
               file.write(f"{boatIDs[j]} is a dupe of {boatIDs[i]}\n")
             boatIDs.remove(boatIDs[j]) #remove the duplicate ID from the boatIDs list so it doesn't try to compare against other batches
-            #break
+            break
             
         else: #if the images are not a match
           comp_results[i+1] = boatIDs[i], l_index, 0, 'O', 0, 0, classNamei #add boat ID to the dictionary as an orphan
@@ -129,6 +132,8 @@ def compare():
         j+=1
 
     else: #if there are no other boats to compare against (it's the last ID of the list)
+      classNamei = compare1[0].replace('.jpg', '').split("_")[4] #take the detections class name from its first detection
+      l_index = int(((compare1[4].split("_"))[1])) #take the detection time of the last image as the 'launch' time
       comp_results[i+1] = boatIDs[i], l_index, 0, 'O', 0, 0, classNamei #add as an orphan
       with open("results.txt", "a") as file:
               file.write(f"{boatIDs[i]} is an orphan\n")
